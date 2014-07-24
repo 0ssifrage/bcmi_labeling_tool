@@ -1,5 +1,5 @@
-drop table if exists images;
-create table images (
+drop table if exists labels;
+create table labels (
     id integer primary key autoincrement,
     imgname text not null,
     imgpath text not null,

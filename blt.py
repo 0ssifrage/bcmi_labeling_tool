@@ -1,6 +1,6 @@
 import json
 import os
-from flask import Flask, render_template, Response, abort, g
+from flask import Flask, render_template, Response, abort, g, request
 from sqlite3 import dbapi2 as sqlite3
 import config
 
@@ -50,16 +50,94 @@ def labeling(page_num):
     page_num = int(page_num)
     imgs = os.listdir(config.image_folder)
     pimgs = imgs[(page_num - 1) * NUM_PER_PAGE: page_num * NUM_PER_PAGE]
+    attrs = config.attributes
+
+    db = get_db()
+    img_v = []
+    for img in pimgs:
+        d = {}
+        for attr in attrs:
+            d[attr['id']] = 0
+
+        cur = db.execute('select value from labels where imgname="%s"' % img)
+        t = cur.fetchall()
+        if t:
+            v = json.loads(t[0][0])
+            for attr_id in v:
+                d[int(attr_id)] = v[attr_id]
+        img_v.append({"img": img, "v": d})
+    print img_v
+
     return render_template(
-        'labeling.html', page_id=2, attrs=config.attributes, imgs=pimgs
+        'labeling.html', page_id=2, attrs=config.attributes, imgs=img_v
     )
 
 
-@app.route('/result')
-def result():
+@app.route('/update', methods=['POST'])
+def update():
+    img = request.form['img']
+    attr_id = request.form['attr_id']
+    v_id = int(request.form['v_id'])
+    db = get_db()
+    cur = db.execute('select value from labels where imgname="%s"' % img)
+    t = cur.fetchall()
+    if not t:
+        cur = db.execute(
+            'insert into labels (imgname, imgpath, value) values(?, ?, ?)',
+            [img, os.path.join(config.image_folder, img),
+                json.dumps({attr_id: v_id})]
+        )
+        db.commit()
+    else:
+        v = json.loads(t[0][0])
+        if v_id == 0:
+            if attr_id in v:
+                del v[attr_id]
+            else:
+                return 'done'
+        else:
+            v[attr_id] = v_id
+
+        cur = db.execute(
+            "update labels set imgpath='%s', value='%s' where imgname='%s'" % (
+                os.path.join(config.image_folder, img), json.dumps(v), img
+            )
+        )
+        db.commit()
+    return 'done'
+
+
+@app.route('/result/<page_num>')
+def result(page_num):
+    NUM_PER_PAGE = 100
+
+    page_num = int(page_num)
     imgs = os.listdir(config.image_folder)
+    pimgs = imgs[(page_num - 1) * NUM_PER_PAGE: page_num * NUM_PER_PAGE]
+    attrs = config.attributes
+    attr_id_v = {}
+    attr_id_name = {}
+    for attr in attrs:
+        attr_id_name[attr['id']] = attr['name']
+        attr_id_v[attr['id']] = attr['value']
+    db = get_db()
+
+    img_v = []
+    for img in pimgs:
+        d = {}
+        for attr in attrs:
+            d[attr['id']] = '-'
+
+        cur = db.execute('select value from labels where imgname="%s"' % img)
+        t = cur.fetchall()
+        if t:
+            v = json.loads(t[0][0])
+            for attr_id in v:
+                d[int(attr_id)] = attr_id_v[int(attr_id)][v[attr_id]-1]
+        img_v.append({"img": img, "v": d})
+
     return render_template(
-        'result.html', page_id=3, attrs=config.attributes, imgs=imgs
+        'result.html', page_id=3, attrs=attr_id_name, imgs=img_v
     )
 
 

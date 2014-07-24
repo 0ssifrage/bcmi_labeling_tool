@@ -1,0 +1,26 @@
+#large-view {
+    position: fixed;
+    top: 80px;
+}
+
+.image-label {
+    margin-top: 10px;
+}
+
+.val {
+    color: #666;
+    background-color: #fafafa;
+    padding: 0 1px;
+    border: solid #eee 1px;
+    border-radius: 3px;
+    cursor: pointer;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}
+
+.val-selected {
+    background-color: #fac;
+    color: #fff;
+}

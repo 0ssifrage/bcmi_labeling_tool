@@ -8,14 +8,14 @@
                     {% if (loop.index0 % 4 == 0) %}
                     <div class="row">
                     {% endif %}
-                        <div class="col-md-3" id="image-label">
-                            <div><img src="/image/{{ img }}" class="img-responsive"></div>
-                            <div>{{ img }}</div>
+                        <div class="col-md-3 image-label" data-img="{{ img.img }}">
+                            <div><img src="/image/{{ img.img }}" class="img-s img-responsive"></div>
+                            <div>{{ img.img }}</div>
                             {% for attr in attrs %}
-                            <div>
+                            <div class="attr" data-attrid="{{ attr['id'] }}" data-attrv="{{ img.v[attr['id']] }}">
                                 <span>{{ attr['name'] }}</span>:
                                 {% for v in attr['value'] %}
-                                <span>{{ v }}</span>
+                                <span class="val" data-vid="{{ loop.index }}">{{ v }}</span>
                                 {% endfor %}
                             </div>
                             {% endfor %}
@@ -26,9 +26,9 @@
                 {% endfor %}
             </div>
             <div class="col-md-4">
-                <div class="row">
+                <div class="row" id="large-view">
                     <div class="col-md-12">
-                        <img src="/image/{{ imgs.0 }}" id="img-view" class="img-responsive img-thumbnail">
+                        <img src="/image/{{ imgs.0.img }}" id="img-view" class="img-responsive img-thumbnail">
                     </div>
                 </div>
             </div>

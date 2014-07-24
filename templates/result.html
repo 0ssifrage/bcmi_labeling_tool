@@ -10,15 +10,18 @@
                             <th>#</th>
                             <th>image</th>
                             {% for attr in attrs %}
-                            <th>{{ attr['name'] }}</th>
+                            <th>{{ attrs[attr] }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                     {% for img in imgs %}
                     <tr>
-                        <td><img src="/image/{{img}}" style="max-height: 50px"></td>
-                        <td>{{ img }}</td>
+                        <td><img src="/image/{{ img.img }}" style="max-height: 50px"></td>
+                        <td>{{ img.img }}</td>
+                        {% for attr in attrs %}
+                        <td>{{ img.v[attr] }}</td>
+                        {% endfor %}
                     </tr>
                     {% endfor %}
                     </tbody>
