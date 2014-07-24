@@ -49,6 +49,7 @@ def labeling(page_num):
 
     page_num = int(page_num)
     imgs = os.listdir(config.image_folder)
+    max_page = (len(imgs) - 1) / NUM_PER_PAGE + 1
     pimgs = imgs[(page_num - 1) * NUM_PER_PAGE: page_num * NUM_PER_PAGE]
     attrs = config.attributes
 
@@ -66,10 +67,10 @@ def labeling(page_num):
             for attr_id in v:
                 d[int(attr_id)] = v[attr_id]
         img_v.append({"img": img, "v": d})
-    print img_v
 
     return render_template(
-        'labeling.html', page_id=2, attrs=config.attributes, imgs=img_v
+        'labeling.html', page_id=2, attrs=config.attributes, imgs=img_v,
+        page_num=page_num, max_page=max_page
     )
 
 
@@ -113,6 +114,7 @@ def result(page_num):
 
     page_num = int(page_num)
     imgs = os.listdir(config.image_folder)
+    max_page = (len(imgs) - 1) / NUM_PER_PAGE + 1
     pimgs = imgs[(page_num - 1) * NUM_PER_PAGE: page_num * NUM_PER_PAGE]
     attrs = config.attributes
     attr_id_v = {}
@@ -137,7 +139,8 @@ def result(page_num):
         img_v.append({"img": img, "v": d})
 
     return render_template(
-        'result.html', page_id=3, attrs=attr_id_name, imgs=img_v
+        'result.html', page_id=3, attrs=attr_id_name, imgs=img_v,
+        page_num=page_num, max_page=max_page
     )
 
 
