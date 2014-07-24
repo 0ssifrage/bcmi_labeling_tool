@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>BCMI Labeling Tool</title>
+        <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+        <script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">BCMI Labeling Tool</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li {% if page_id == 1 %}class="active"{% endif %}><a href="/">Index</a></li>
+                <li {% if page_id == 2 %}class="active"{% endif %}><a href="/labeling/1">Labeling</a></li>
+                <li {% if page_id == 3 %}class="active"{% endif %}><a href="/result">Result</a></li>
+            </ul>
+        </nav>
+        {% block content %}{% endblock %}
+    </body>
+</html>

@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="imgs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                {% for img in imgs %}
+                    {% if (loop.index0 % 4 == 0) %}
+                    <div class="row">
+                    {% endif %}
+                        <div class="col-md-3" id="image-label">
+                            <div><img src="/image/{{ img }}" class="img-responsive"></div>
+                            <div>{{ img }}</div>
+                            {% for attr in attrs %}
+                            <div>
+                                <span>{{ attr['name'] }}</span>:
+                                {% for v in attr['value'] %}
+                                <span>{{ v }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% if (loop.index % 4 == 0 or (loop.last and loop.index % 4 != 0)) %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <img src="/image/{{ imgs.0 }}" id="img-view" class="img-responsive img-thumbnail">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="res">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>image</th>
+                            {% for attr in attrs %}
+                            <th>{{ attr['name'] }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for img in imgs %}
+                    <tr>
+                        <td><img src="/image/{{img}}" style="max-height: 50px"></td>
+                        <td>{{ img }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-4">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
