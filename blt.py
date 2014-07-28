@@ -60,7 +60,9 @@ def labeling(page_num):
         for attr in attrs:
             d[attr['id']] = 0
 
-        cur = db.execute('select value from labels where imgname="%s"' % img)
+        cur = db.execute(
+            'select value from attributes where imgname="%s"' % img
+        )
         t = cur.fetchall()
         if t:
             v = json.loads(t[0][0])
@@ -69,7 +71,38 @@ def labeling(page_num):
         img_v.append({"img": img, "v": d})
 
     return render_template(
-        'labeling.html', page_id=2, attrs=config.attributes, imgs=img_v,
+        'labeling.html', page_id=2, attrs=attrs, imgs=img_v,
+        page_num=page_num, max_page=max_page
+    )
+
+
+@app.route('/region/<page_num>')
+def region(page_num):
+    NUM_PER_PAGE = 50
+
+    page_num = int(page_num)
+    imgs = os.listdir(config.image_folder)
+    max_page = (len(imgs) - 1) / NUM_PER_PAGE + 1
+    pimgs = imgs[(page_num - 1) * NUM_PER_PAGE: page_num * NUM_PER_PAGE]
+    regs = config.regions
+
+    db = get_db()
+    img_v = []
+    for img in pimgs:
+        d = {}
+        for reg in regs:
+            d[reg['id']] = [[0, 0], [0, 0]]
+
+        cur = db.execute('select value from regions where imgname="%s"' % img)
+        t = cur.fetchall()
+        if t:
+            v = json.loads(t[0][0])
+            for reg_id in v:
+                d[int(reg_id)] = v[reg_id]
+        img_v.append({"img": img, "v": d})
+
+    return render_template(
+        'region.html', page_id=4, regs=regs, imgs=img_v,
         page_num=page_num, max_page=max_page
     )
 
@@ -80,11 +113,11 @@ def update():
     attr_id = request.form['attr_id']
     v_id = int(request.form['v_id'])
     db = get_db()
-    cur = db.execute('select value from labels where imgname="%s"' % img)
+    cur = db.execute('select value from attributes where imgname="%s"' % img)
     t = cur.fetchall()
     if not t:
         cur = db.execute(
-            'insert into labels (imgname, imgpath, value) values(?, ?, ?)',
+            'insert into attributes (imgname, imgpath, value) values(?, ?, ?)',
             [img, os.path.join(config.image_folder, img),
                 json.dumps({attr_id: v_id})]
         )
@@ -100,7 +133,8 @@ def update():
             v[attr_id] = v_id
 
         cur = db.execute(
-            "update labels set imgpath='%s', value='%s' where imgname='%s'" % (
+            "update attributes set imgpath='%s', value='%s'"
+            "where imgname='%s'" % (
                 os.path.join(config.image_folder, img), json.dumps(v), img
             )
         )
@@ -130,7 +164,9 @@ def result(page_num):
         for attr in attrs:
             d[attr['id']] = '-'
 
-        cur = db.execute('select value from labels where imgname="%s"' % img)
+        cur = db.execute(
+            'select value from attributes where imgname="%s"' % img
+        )
         t = cur.fetchall()
         if t:
             v = json.loads(t[0][0])

@@ -29,4 +29,18 @@ $(document).ready(function(){
             };
         });
     });
+    $(".img-reg").each(function(){
+        var ths = this;
+        var showCoords = function(c) {
+            var t = $(ths).parent().siblings(".reg");
+            t.children(".p1x").val(c.x);
+            t.children(".p1y").val(c.y);
+            t.children(".p2x").val(c.x2);
+            t.children(".p2y").val(c.x2);
+        };
+        $(ths).Jcrop({
+            onChange: showCoords,
+            onSelect: showCoords
+        });
+    });
 });

@@ -10,3 +10,7 @@ attributes = [
     {"id": 4, "name": u"卷边", "value": ["yes", "no"]},
     {"id": 5, "name": u"连接处", "value": ["belt", "none"]}
 ]
+
+regions = [
+    {"id": 1, "name": u"纽扣"}
+]

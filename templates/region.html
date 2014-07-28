@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="imgs">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                {% for img in imgs %}
+                    {% if (loop.index0 % 3 == 0) %}
+                    <div class="row">
+                    {% endif %}
+                        <div class="col-md-4 image-label" data-img="{{ img.img }}">
+                            <div><img src="/image/{{ img.img }}" class="img-s img-reg"></div>
+                            <div>{{ img.img }}</div>
+                            {% for reg in regs %}
+                            <div class="reg" data-regid="{{ reg['id'] }}">
+                                <input class="p1x" value="{{ img.v[reg['id']][0][0] }}">
+                                <input class="p1y" value="{{ img.v[reg['id']][0][1] }}">
+                                <input class="p2x" value="{{ img.v[reg['id']][1][0] }}">
+                                <input class="p2y" value="{{ img.v[reg['id']][1][1] }}">
+                            </div>
+                            {% endfor %}
+                       </div>
+                    {% if (loop.index % 3 == 0 or (loop.last and loop.index % 3 != 0)) %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="pagination">
+                {% for i in range(1, max_page+1) %}
+                <li {% if i == page_num %}class="active"{% endif %}><a href="/region/{{ i }}">{{ i }}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
