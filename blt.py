@@ -183,7 +183,7 @@ def result(page_num):
 @app.route('/image/<img_name>')
 def image(img_name):
     img_path = os.path.join(config.image_folder, img_name)
-    print img_path
+    # print img_path
     if os.path.exists(img_path):
         ext = img_name.split(".")[-1]
         c_type = {
