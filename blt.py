@@ -201,4 +201,4 @@ def image(img_name):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=False, host=config.host, port=config.port)
