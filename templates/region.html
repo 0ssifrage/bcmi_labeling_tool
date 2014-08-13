@@ -2,6 +2,8 @@
 {% block content %}
 <div id="imgs">
     <div class="container">
+        <div data-regid="{{ reg['id'] }}" id="regid"><h1>标注区域：{{ reg['name'] }}</h1></div>
+        <hr>
         <div class="row">
             <div class="col-md-12">
                 {% for img in imgs %}
@@ -11,14 +13,16 @@
                         <div class="col-md-4 image-label" data-img="{{ img.img }}">
                             <div><img src="/image/{{ img.img }}" class="img-s img-reg"></div>
                             <div>{{ img.img }}</div>
-                            {% for reg in regs %}
-                            <div class="reg" data-regid="{{ reg['id'] }}">
-                                <input class="p1x" value="{{ img.v[reg['id']][0][0] }}">
-                                <input class="p1y" value="{{ img.v[reg['id']][0][1] }}">
-                                <input class="p2x" value="{{ img.v[reg['id']][1][0] }}">
-                                <input class="p2y" value="{{ img.v[reg['id']][1][1] }}">
+                            <div class="reg">
+                                <div class="col-md-9">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" disabled="disabled" class="xy-show form-control">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-success reg-submit" type="button" data-x1="{{ img.v[0] }}" data-y1="{{ img.v[1] }}" data-x2="{{ img.v[2] }}" data-y2="{{ img.v[3] }}" data-init="4">Submit</button>
+                                            </span>
+                                    </div>
+                                </div>
                             </div>
-                            {% endfor %}
                        </div>
                     {% if (loop.index % 3 == 0 or (loop.last and loop.index % 3 != 0)) %}
                     </div>

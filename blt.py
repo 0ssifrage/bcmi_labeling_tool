@@ -40,7 +40,7 @@ def close_db(error):
 
 @app.route('/')
 def index():
-    return render_template('index.html', page_id=1)
+    return render_template('index.html', page_id=1, regions=config.regions)
 
 
 @app.route('/labeling/<page_num>')
@@ -71,13 +71,14 @@ def labeling(page_num):
         img_v.append({"img": img, "v": d})
 
     return render_template(
-        'labeling.html', page_id=2, attrs=attrs, imgs=img_v,
+        'labeling.html', page_id=2, regions=config.regions,
+        attrs=attrs, imgs=img_v,
         page_num=page_num, max_page=max_page
     )
 
 
-@app.route('/region/<page_num>')
-def region(page_num):
+@app.route('/region/<region_id>/<page_num>')
+def region(region_id, page_num):
     NUM_PER_PAGE = 50
 
     page_num = int(page_num)
@@ -85,24 +86,27 @@ def region(page_num):
     max_page = (len(imgs) - 1) / NUM_PER_PAGE + 1
     pimgs = imgs[(page_num - 1) * NUM_PER_PAGE: page_num * NUM_PER_PAGE]
     regs = config.regions
-
+    for r in regs:
+        if r["id"] == int(region_id):
+            reg = r
+            break
     db = get_db()
     img_v = []
     for img in pimgs:
-        d = {}
-        for reg in regs:
-            d[reg['id']] = [[0, 0], [0, 0]]
-
+        d = [0, 0, 0, 0]
         cur = db.execute('select value from regions where imgname="%s"' % img)
         t = cur.fetchall()
         if t:
             v = json.loads(t[0][0])
-            for reg_id in v:
-                d[int(reg_id)] = v[reg_id]
+            for r_id in v:
+                if r_id == region_id:
+                    d = v[r_id]
+                    break
         img_v.append({"img": img, "v": d})
 
     return render_template(
-        'region.html', page_id=4, regs=regs, imgs=img_v,
+        'region.html', page_id=4, regions=config.regions,
+        reg=reg, imgs=img_v,
         page_num=page_num, max_page=max_page
     )
 
@@ -134,6 +138,39 @@ def update():
 
         cur = db.execute(
             "update attributes set imgpath='%s', value='%s'"
+            "where imgname='%s'" % (
+                os.path.join(config.image_folder, img), json.dumps(v), img
+            )
+        )
+        db.commit()
+    return 'done'
+
+
+@app.route('/update_region', methods=['POST'])
+def update_region():
+    img = request.form['img']
+    reg_id = request.form['regid']
+    pos = [
+        request.form['x1'], request.form['y1'],
+        request.form['x2'], request.form['y2']
+    ]
+
+    db = get_db()
+    cur = db.execute('select value from regions where imgname="%s"' % img)
+    t = cur.fetchall()
+    if not t:
+        cur = db.execute(
+            'insert into regions (imgname, imgpath, value) values(?, ?, ?)',
+            [img, os.path.join(config.image_folder, img),
+                json.dumps({reg_id: pos})]
+        )
+        db.commit()
+    else:
+        v = json.loads(t[0][0])
+        v[reg_id] = pos
+
+        cur = db.execute(
+            "update regions set imgpath='%s', value='%s'"
             "where imgname='%s'" % (
                 os.path.join(config.image_folder, img), json.dumps(v), img
             )
@@ -175,7 +212,8 @@ def result(page_num):
         img_v.append({"img": img, "v": d})
 
     return render_template(
-        'result.html', page_id=3, attrs=attr_id_name, imgs=img_v,
+        'result.html', page_id=3, regions=config.regions,
+        attrs=attr_id_name, imgs=img_v,
         page_num=page_num, max_page=max_page
     )
 
@@ -201,4 +239,4 @@ def image(img_name):
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host=config.host, port=config.port)
+    app.run(debug=True, host=config.host, port=config.port)

@@ -15,5 +15,6 @@ attributes = [
 ]
 
 regions = [
-    {"id": 1, "name": u"纽扣"}
+    {"id": 1, "name": u"纽扣"},
+    {"id": 2, "name": u"鞋子"}
 ]
