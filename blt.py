@@ -1,6 +1,7 @@
 import json
 import os
-from flask import Flask, render_template, Response, abort, g, request
+from flask import Flask, render_template, Response, abort, g, request, \
+    make_response
 from sqlite3 import dbapi2 as sqlite3
 import config
 
@@ -61,7 +62,9 @@ def labeling(page_num):
             d[attr['id']] = 0
 
         cur = db.execute(
-            'select value from attributes where imgname="%s"' % img
+            'select value from attributes where imgpath="%s"' % (
+                os.path.join(config.image_folder, img)
+            )
         )
         t = cur.fetchall()
         if t:
@@ -94,7 +97,9 @@ def region(region_id, page_num):
     img_v = []
     for img in pimgs:
         d = [0, 0, 0, 0]
-        cur = db.execute('select value from regions where imgname="%s"' % img)
+        cur = db.execute('select value from regions where imgpath="%s"' % (
+            os.path.join(config.image_folder, img))
+        )
         t = cur.fetchall()
         if t:
             v = json.loads(t[0][0])
@@ -117,7 +122,9 @@ def update():
     attr_id = request.form['attr_id']
     v_id = int(request.form['v_id'])
     db = get_db()
-    cur = db.execute('select value from attributes where imgname="%s"' % img)
+    cur = db.execute('select value from attributes where imgpath="%s"' % (
+        os.path.join(config.image_folder, img))
+    )
     t = cur.fetchall()
     if not t:
         cur = db.execute(
@@ -137,9 +144,9 @@ def update():
             v[attr_id] = v_id
 
         cur = db.execute(
-            "update attributes set imgpath='%s', value='%s'"
-            "where imgname='%s'" % (
-                os.path.join(config.image_folder, img), json.dumps(v), img
+            "update attributes set value='%s'"
+            "where imgpath='%s'" % (
+                json.dumps(v), os.path.join(config.image_folder, img)
             )
         )
         db.commit()
@@ -156,7 +163,9 @@ def update_region():
     ]
 
     db = get_db()
-    cur = db.execute('select value from regions where imgname="%s"' % img)
+    cur = db.execute('select value from regions where imgpath="%s"' % (
+        os.path.join(config.image_folder, img))
+    )
     t = cur.fetchall()
     if not t:
         cur = db.execute(
@@ -170,9 +179,9 @@ def update_region():
         v[reg_id] = pos
 
         cur = db.execute(
-            "update regions set imgpath='%s', value='%s'"
-            "where imgname='%s'" % (
-                os.path.join(config.image_folder, img), json.dumps(v), img
+            "update regions set value='%s'"
+            "where imgpath='%s'" % (
+                json.dumps(v), os.path.join(config.image_folder, img)
             )
         )
         db.commit()
@@ -202,7 +211,9 @@ def result(page_num):
             d[attr['id']] = '-'
 
         cur = db.execute(
-            'select value from attributes where imgname="%s"' % img
+            'select value from attributes where imgpath="%s"' % (
+                os.path.join(config.image_folder, img)
+            )
         )
         t = cur.fetchall()
         if t:
@@ -216,6 +227,48 @@ def result(page_num):
         attrs=attr_id_name, imgs=img_v,
         page_num=page_num, max_page=max_page
     )
+
+
+@app.route('/export/<extype>')
+def export(extype):
+    extype = int(extype)
+    db = get_db()
+    f = ""
+    if extype == 1:
+        filename = "label.txt"
+        attrs = config.attributes
+        cur = db.execute('select * from attributes order by imgpath')
+        t = cur.fetchall()
+        for l in t:
+            f += l[2]
+            v = json.loads(l[3])
+            for a in attrs:
+                f += '\t'
+                if str(a["id"]) in v:
+                    f += a["value"][int(v[str(a["id"])])-1]
+                else:
+                    f += "-"
+            f += "\n"
+    elif extype == 2:
+        filename = "region.txt"
+        regs = config.regions
+        cur = db.execute('select * from regions order by imgpath')
+        t = cur.fetchall()
+        for l in t:
+            f += l[2]
+            v = json.loads(l[3])
+            for r in regs:
+                f += '\t'
+                if str(r["id"]) in v:
+                    f += json.dumps(v[str(r["id"])])
+                else:
+                    f += "-"
+            f += "\n"
+
+    resp = make_response(f)
+    resp.headers['Content-Type'] = "text/plain"
+    resp.headers['Content-Disposition'] = "attachment; filename=%s" % filename
+    return resp
 
 
 @app.route('/image/<img_name>')
