@@ -34,7 +34,7 @@
             <div class="col-md-12">
                 <ul class="pagination">
                 {% for i in range(1, max_page+1) %}
-                <li {% if i == page_num %}class="active"{% endif %}><a href="/region/{{ i }}">{{ i }}</a></li>
+                <li {% if i == page_num %}class="active"{% endif %}><a href="/region/{{ reg['id'] }}/{{ i }}">{{ i }}</a></li>
                 {% endfor %}
                 </ul>
             </div>
