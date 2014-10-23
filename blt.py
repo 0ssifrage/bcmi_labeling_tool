@@ -229,41 +229,59 @@ def result(page_num):
     )
 
 
-@app.route('/export/<extype>')
-def export(extype):
+@app.route('/export/<exfile>/<extype>')
+def export(exfile, extype):
     extype = int(extype)
     db = get_db()
     f = ""
     if extype == 1:
-        filename = "label.txt"
+        if exfile == "json":
+            filename = "label.json"
+        else:
+            filename = "label.txt"
         attrs = config.attributes
         cur = db.execute('select * from attributes order by imgpath')
         t = cur.fetchall()
-        for l in t:
-            f += l[2]
-            v = json.loads(l[3])
-            for a in attrs:
-                f += '\t'
-                if str(a["id"]) in v:
-                    f += a["value"][int(v[str(a["id"])])-1]
-                else:
-                    f += "-"
-            f += "\n"
+        if exfile == "json":
+            d = []
+            for l in t:
+                d.append(list(l))
+            f = json.dumps(d)
+        else:
+            for l in t:
+                f += l[2]
+                v = json.loads(l[3])
+                for a in attrs:
+                    f += '\t'
+                    if str(a["id"]) in v:
+                        f += a["value"][int(v[str(a["id"])])-1]
+                    else:
+                        f += "-"
+                f += "\n"
     elif extype == 2:
-        filename = "region.txt"
+        if exfile == "json":
+            filename = "region.json"
+        else:
+            filename = "region.txt"
         regs = config.regions
         cur = db.execute('select * from regions order by imgpath')
         t = cur.fetchall()
-        for l in t:
-            f += l[2]
-            v = json.loads(l[3])
-            for r in regs:
-                f += '\t'
-                if str(r["id"]) in v:
-                    f += json.dumps(v[str(r["id"])])
-                else:
-                    f += "-"
-            f += "\n"
+        if exfile == "json":
+            d = []
+            for l in t:
+                d.append(list(l))
+            f = json.dumps(d)
+        else:
+            for l in t:
+                f += l[2]
+                v = json.loads(l[3])
+                for r in regs:
+                    f += '\t'
+                    if str(r["id"]) in v:
+                        f += json.dumps(v[str(r["id"])])
+                    else:
+                        f += "-"
+                f += "\n"
 
     resp = make_response(f)
     resp.headers['Content-Type'] = "text/plain"
